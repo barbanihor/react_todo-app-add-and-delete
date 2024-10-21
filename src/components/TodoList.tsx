@@ -11,6 +11,7 @@ interface Props {
   anyLoading: boolean;
   clearCompleteLoading: Todo[];
   setTodos: (todos: Todo[]) => void;
+  deleteTodo: (todo: Todo) => void;
   setErrorMessage: (errorMessage: Errors | '') => void;
   resetError: () => void;
   setLoadingTodo: (todo: Todo | null) => void;
@@ -23,6 +24,7 @@ export const TodoList: React.FC<Props> = ({
   anyLoading,
   clearCompleteLoading,
   setTodos,
+  deleteTodo,
   setErrorMessage,
   resetError,
   setLoadingTodo,
@@ -61,8 +63,7 @@ export const TodoList: React.FC<Props> = ({
     setLoadingTodo(todo);
 
     deleteSelectedTodo(todo)
-      .then(getTodos)
-      .then(data => setTodos(data))
+      .then(() => deleteTodo(todo))
       .catch(() => {
         setErrorMessage(Errors.notDelete);
         setTimeout(resetError, 3000);

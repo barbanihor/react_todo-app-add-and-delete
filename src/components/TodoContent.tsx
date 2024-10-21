@@ -67,6 +67,14 @@ export const TodoContent: React.FC = () => {
     }
   }
 
+  function handleDeleteTodo(todoToDelete: Todo) {
+    const filteredTodoses = todosFromServer.filter(
+      filtTodo => filtTodo.id !== todoToDelete.id,
+    );
+
+    setTodosFromServer(filteredTodoses);
+  }
+
   function handleUpdateTodos(todoses: Todo[]) {
     setTodosFromServer(todoses);
   }
@@ -208,6 +216,7 @@ export const TodoContent: React.FC = () => {
           anyLoading={anyLoading}
           clearCompleteLoading={complTodoDeleteLoading}
           setTodos={handleUpdateTodos}
+          deleteTodo={handleDeleteTodo}
           setErrorMessage={handleErrorMessage}
           resetError={resetErrorMessage}
           setLoadingTodo={setLoadingValue}
@@ -262,16 +271,15 @@ export const TodoContent: React.FC = () => {
             </nav>
 
             {/* this button should be disabled if there are no completed todos */}
-            {completedTodos.length !== 0 && (
-              <button
-                type="button"
-                className="todoapp__clear-completed"
-                data-cy="ClearCompletedButton"
-                onClick={handleClearCompleted}
-              >
-                Clear completed
-              </button>
-            )}
+            <button
+              disabled={completedTodos.length !== 0}
+              type="button"
+              className="todoapp__clear-completed"
+              data-cy="ClearCompletedButton"
+              onClick={handleClearCompleted}
+            >
+              Clear completed
+            </button>
           </footer>
         ) : null}
       </div>
