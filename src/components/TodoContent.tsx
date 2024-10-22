@@ -11,6 +11,8 @@ import {
 import { Errors } from '../types/Errors';
 import classNames from 'classnames';
 import { FilterBy } from '../types/FilterBy';
+import { Header } from './Header';
+import { Footer } from './Footer';
 
 export const TodoContent: React.FC = () => {
   const [todoValue, setTodoValue] = useState<string>('');
@@ -52,8 +54,13 @@ export const TodoContent: React.FC = () => {
     completedTodos.map(compTodo => {
       setComplTodoDeleteLoading(prev => [...prev, compTodo]);
       deleteSelectedTodo(compTodo)
-        .then(() => getTodos())
-        .then(setTodosFromServer)
+        .then(() =>
+          setTodosFromServer(currentTodos =>
+            currentTodos.filter(
+              filteringTodo => filteringTodo.id !== compTodo.id,
+            ),
+          ),
+        )
         .catch(() => setErrorMessage(Errors.notDelete))
         .finally(() => setComplTodoDeleteLoading([]));
     });
@@ -181,33 +188,16 @@ export const TodoContent: React.FC = () => {
   return (
     <>
       <div className="todoapp__content">
-        <header className="todoapp__header">
-          {/* this button should have `active` class only if all todos are completed */}
-          {todosFromServer.length !== 0 && (
-            <button
-              type="button"
-              className={classNames('todoapp__toggle-all', {
-                active: isAllcompleted,
-              })}
-              data-cy="ToggleAllButton"
-              onClick={handleAllButtonClick}
-            />
-          )}
-
-          {/* Add a todo on form submit */}
-          <form onSubmit={handleSubmit}>
-            <input
-              ref={todoFieldRef}
-              disabled={inputDisabled}
-              value={todoValue}
-              onChange={handleInputChange}
-              data-cy="NewTodoField"
-              type="text"
-              className="todoapp__new-todo"
-              placeholder="What needs to be done?"
-            />
-          </form>
-        </header>
+        <Header
+          todosFromServer={todosFromServer}
+          isAllcompleted={isAllcompleted}
+          handleAllButtonClick={handleAllButtonClick}
+          handleSubmit={handleSubmit}
+          todoFieldRef={todoFieldRef}
+          inputDisabled={inputDisabled}
+          todoValue={todoValue}
+          handleInputChange={handleInputChange}
+        />
 
         <TodoList
           todos={filterTodosByStatus()}
@@ -223,64 +213,13 @@ export const TodoContent: React.FC = () => {
         />
 
         {todosFromServer.length ? (
-          <footer className="todoapp__footer" data-cy="Footer">
-            <span className="todo-count" data-cy="TodosCounter">
-              {active.length} items left
-            </span>
-
-            {/* Active link should have the 'selected' class */}
-            <nav className="filter" data-cy="Filter">
-              <a
-                href="#/"
-                className={classNames('filter__link', {
-                  selected: filterStatus === FilterBy.all,
-                })}
-                data-cy="FilterLinkAll"
-                onClick={() => {
-                  setFilterStatus(FilterBy.all);
-                }}
-              >
-                {FilterBy.all}
-              </a>
-
-              <a
-                href="#/active"
-                className={classNames('filter__link', {
-                  selected: filterStatus === FilterBy.active,
-                })}
-                data-cy="FilterLinkActive"
-                onClick={() => {
-                  setFilterStatus(FilterBy.active);
-                }}
-              >
-                {FilterBy.active}
-              </a>
-
-              <a
-                href="#/completed"
-                className={classNames('filter__link', {
-                  selected: filterStatus === FilterBy.completed,
-                })}
-                data-cy="FilterLinkCompleted"
-                onClick={() => {
-                  setFilterStatus(FilterBy.completed);
-                }}
-              >
-                {FilterBy.completed}
-              </a>
-            </nav>
-
-            {/* this button should be disabled if there are no completed todos */}
-            <button
-              disabled={completedTodos.length !== 0}
-              type="button"
-              className="todoapp__clear-completed"
-              data-cy="ClearCompletedButton"
-              onClick={handleClearCompleted}
-            >
-              Clear completed
-            </button>
-          </footer>
+          <Footer
+            handleFilterStatus={status => setFilterStatus(status)}
+            active={active}
+            filterStatus={filterStatus}
+            completedTodos={completedTodos}
+            handleClearCompleted={handleClearCompleted}
+          />
         ) : null}
       </div>
 
