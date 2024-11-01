@@ -15,17 +15,24 @@ import { Header } from './Header';
 import { Footer } from './Footer';
 
 export const TodoContent: React.FC = () => {
-  const [todoValue, setTodoValue] = useState<string>('');
+  const [todoValue, setTodoValue] = useState('');
   const [todosFromServer, setTodosFromServer] = useState<Todo[]>([]);
   const [errorMessage, setErrorMessage] = useState<string>('');
   const [loadingTodo, setLoadingTodo] = useState<Todo | null>(null);
-  const [completedTodos, setCompletedTodos] = useState<Todo[]>([]);
-  const [isAllcompleted, setIsAllCompleted] = useState<boolean>(false);
   const [anyLoading, setAnyLoading] = useState<boolean>(false);
   const [filterStatus, setFilterStatus] = useState<FilterBy>(FilterBy.all);
   const [complTodoDeleteLoading, setComplTodoDeleteLoading] = useState<Todo[]>(
     [],
   );
+
+  const completedTodos = useMemo(() => {
+    return todosFromServer.filter(todo => todo.completed);
+  }, [todosFromServer]);
+
+  const isAllcompleted = useMemo(() => {
+    return todosFromServer.every(todo => todo.completed);
+  }, [todosFromServer]);
+
   const [inputDisabled, setInputDisabled] = useState<boolean>(false);
 
   const todoFieldRef = useRef<HTMLInputElement | null>(null);
@@ -170,16 +177,6 @@ export const TodoContent: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    if (todosFromServer.every(todo => todo.completed)) {
-      setIsAllCompleted(true);
-    } else {
-      setIsAllCompleted(false);
-    }
-
-    setCompletedTodos([...todosFromServer].filter(todo => todo.completed));
-  }, [todosFromServer]);
-
-  useEffect(() => {
     if (todoFieldRef.current) {
       todoFieldRef.current.focus();
     }
@@ -200,6 +197,7 @@ export const TodoContent: React.FC = () => {
         />
 
         <TodoList
+          isAllcompleted={isAllcompleted}
           todos={filterTodosByStatus()}
           completedTodos={completedTodos}
           loadingTodo={loadingTodo}
@@ -212,7 +210,7 @@ export const TodoContent: React.FC = () => {
           setLoadingTodo={setLoadingValue}
         />
 
-        {todosFromServer.length ? (
+        {todosFromServer.length !== 0 && (
           <Footer
             handleFilterStatus={status => setFilterStatus(status)}
             active={active}
@@ -220,7 +218,7 @@ export const TodoContent: React.FC = () => {
             completedTodos={completedTodos}
             handleClearCompleted={handleClearCompleted}
           />
-        ) : null}
+        )}
       </div>
 
       <div
@@ -233,11 +231,7 @@ export const TodoContent: React.FC = () => {
         )}
       >
         <button data-cy="HideErrorButton" type="button" className="delete" />
-        {errorMessage === Errors.notLoad && Errors.notLoad}
-        {errorMessage === Errors.notEmpty && Errors.notEmpty}
-        {errorMessage === Errors.notAdd && Errors.notAdd}
-        {errorMessage === Errors.notDelete && Errors.notDelete}
-        {errorMessage === Errors.notUpdate && Errors.notUpdate}
+        {errorMessage}
       </div>
     </>
   );

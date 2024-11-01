@@ -37,12 +37,12 @@ export const Header: React.FC<Props> = ({
       )}
 
       {/* Add a todo on form submit */}
-      <form onSubmit={event => handleSubmit(event)}>
+      <form onSubmit={handleSubmit}>
         <input
           ref={todoFieldRef}
           disabled={inputDisabled}
           value={todoValue}
-          onChange={event => handleInputChange(event)}
+          onChange={handleInputChange}
           data-cy="NewTodoField"
           type="text"
           className="todoapp__new-todo"

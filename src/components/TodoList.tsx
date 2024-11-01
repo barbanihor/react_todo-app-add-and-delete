@@ -9,6 +9,7 @@ interface Props {
   completedTodos: Todo[];
   loadingTodo: Todo | null;
   anyLoading: boolean;
+  isAllcompleted: boolean;
   clearCompleteLoading: Todo[];
   setTodos: (todos: Todo[]) => void;
   deleteTodo: (todo: Todo) => void;
@@ -23,6 +24,7 @@ export const TodoList: React.FC<Props> = ({
   loadingTodo,
   anyLoading,
   clearCompleteLoading,
+  isAllcompleted,
   setTodos,
   deleteTodo,
   setErrorMessage,
@@ -73,13 +75,19 @@ export const TodoList: React.FC<Props> = ({
 
   function handleUpdateSubmit(event: React.FormEvent, todo: Todo) {
     event.preventDefault();
-    setLoadingTodo(todo);
+
+    if (updatingValue.trim() === todo.title.trim()) {
+      setUpdatingTodoId(null);
+      return;
+    }
 
     if (updatingValue.trim() === '') {
       handleDeleteTodo(todo);
 
       return;
     }
+
+    setLoadingTodo(todo);
 
     const updatedTodo = {
       id: todo.id,
@@ -178,7 +186,8 @@ export const TodoList: React.FC<Props> = ({
             className={classNames('modal overlay', {
               'is-active':
                 loadingTodo?.id === todo.id ||
-                anyLoading ||
+                (anyLoading && !todo.completed) ||
+                (anyLoading && isAllcompleted) ||
                 clearCompleteLoading.includes(todo),
             })}
           >
